@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>System Access</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        #matrix { position: absolute; top: 0; left: 0; z-index: -1; }
+        .container { background: rgba(0, 20, 0, 0.9); padding: 30px; border: 2px solid #0f0; border-radius: 10px; text-align: center; box-shadow: 0 0 20px #0f0; z-index: 1; }
+        input { background: #000; border: 1px solid #0f0; color: #0f0; padding: 10px; width: 300px; text-align: center; margin: 10px 0; }
+        button { background: #0f0; color: #000; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <canvas id="matrix"></canvas>
+
+    <div id="login-box" class="container">
+        <h2>XÁC THỰC TRUY CẬP</h2>
+        <input type="password" id="pass" placeholder="Nhập mật khẩu...">
+        <br><button onclick="checkPass()">ĐĂNG NHẬP</button>
+    </div>
+
+    <div id="main-box" class="container hidden">
+        <h2>KIỂM TRA THIẾT BỊ</h2>
+        <input type="text" id="device-input" placeholder="Nhập mã định danh...">
+        <br><button onclick="checkDevice()">XÁC NHẬN</button>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        // Hiệu ứng Matrix
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const letters = "0101010101PTBA";
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+        function draw() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#0F0";
+            ctx.font = fontSize + "px arial";
+            for (let i = 0; i < drops.length; i++) {
+                const text = letters.charAt(Math.floor(Math.random() * letters.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(draw, 33);
+
+        // Logic Ứng dụng
+        function checkPass() {
+            if(document.getElementById('pass').value === 'ptba-key12') {
+                document.getElementById('login-box').classList.add('hidden');
+                document.getElementById('main-box').classList.remove('hidden');
+            } else { alert("Sai mật khẩu!"); }
+        }
+
+        function checkDevice() {
+            const val = document.getElementById('device-input').value;
+            const res = document.getElementById('result');
+            if(val.length === 40) {
+                res.innerText = "Duyệt thiết bị thành công 🚀📱";
+            } else {
+                res.innerText = "Không duyệt thiết bị thành công ❌";
+            }
+        }
+    </script>
+</body>
+</html>
