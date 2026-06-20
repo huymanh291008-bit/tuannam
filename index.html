@@ -4,69 +4,78 @@
     <meta charset="UTF-8">
     <title>System Access</title>
     <style>
-        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
-        #matrix { position: absolute; top: 0; left: 0; z-index: -1; }
-        .container { background: rgba(0, 20, 0, 0.9); padding: 30px; border: 2px solid #0f0; border-radius: 10px; text-align: center; box-shadow: 0 0 20px #0f0; z-index: 1; }
-        input { background: #000; border: 1px solid #0f0; color: #0f0; padding: 10px; width: 300px; text-align: center; margin: 10px 0; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', Courier, monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        canvas { position: absolute; top: 0; left: 0; z-index: 0; }
+        #app { position: relative; z-index: 1; border: 2px solid #0f0; padding: 30px; background: rgba(0,0,0,0.8); box-shadow: 0 0 20px #0f0; text-align: center; }
+        input { background: transparent; border: 1px solid #0f0; color: #0f0; padding: 10px; width: 300px; text-align: center; margin: 10px 0; }
         button { background: #0f0; color: #000; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
         .hidden { display: none; }
+        #timer { font-size: 2em; color: #fff; text-shadow: 0 0 10px #0f0; }
     </style>
 </head>
 <body>
     <canvas id="matrix"></canvas>
 
-    <div id="login-box" class="container">
-        <h2>XÁC THỰC TRUY CẬP</h2>
+    <div id="login-screen">
+        <h2>LOGIN REQUIRED</h2>
         <input type="password" id="pass" placeholder="Nhập mật khẩu...">
-        <br><button onclick="checkPass()">ĐĂNG NHẬP</button>
+        <br><button onclick="checkLogin()">XÁC NHẬN</button>
     </div>
 
-    <div id="main-box" class="container hidden">
-        <h2>KIỂM TRA THIẾT BỊ</h2>
-        <input type="text" id="device-input" placeholder="Nhập mã định danh...">
-        <br><button onclick="checkDevice()">XÁC NHẬN</button>
-        <p id="result"></p>
+    <div id="main-screen" class="hidden">
+        <input type="text" id="device-key" placeholder="Nhập mã thiết bị..." maxlength="41">
+        <br><button onclick="checkDevice()">DUYỆT THIẾT BỊ</button>
+        <p id="status"></p>
+        <div id="timer" class="hidden">01:00:00</div>
     </div>
 
     <script>
         // Hiệu ứng Matrix
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const letters = "0101010101PTBA";
-        const fontSize = 16;
-        const columns = canvas.width / fontSize;
-        const drops = Array(Math.floor(columns)).fill(1);
+        canvas.height = window.innerHeight; canvas.width = window.innerWidth;
+        const drops = Array(Math.floor(canvas.width/10)).fill(1);
         function draw() {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#0F0";
-            ctx.font = fontSize + "px arial";
-            for (let i = 0; i < drops.length; i++) {
-                const text = letters.charAt(Math.floor(Math.random() * letters.length));
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0f0';
+            drops.forEach((y, i) => {
+                ctx.fillText(String.fromCharCode(0x30A0 + Math.random() * 96), i * 10, y * 10);
+                if (y * 10 > canvas.height && Math.random() > 0.975) drops[i] = 0;
                 drops[i]++;
-            }
+            });
         }
         setInterval(draw, 33);
 
-        // Logic Ứng dụng
-        function checkPass() {
+        // Logic
+        function checkLogin() {
             if(document.getElementById('pass').value === 'ptba-key12') {
-                document.getElementById('login-box').classList.add('hidden');
-                document.getElementById('main-box').classList.remove('hidden');
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-screen').classList.remove('hidden');
             } else { alert("Sai mật khẩu!"); }
         }
 
         function checkDevice() {
-            const val = document.getElementById('device-input').value;
-            const res = document.getElementById('result');
-            if(val.length === 40) {
-                res.innerText = "Duyệt thiết bị thành công 🚀📱";
+            const input = document.getElementById('device-key').value;
+            const status = document.getElementById('status');
+            if (input.length === 40) {
+                status.innerText = "Duyệt thiết bị thành công 🚀📱";
+                startTimer();
             } else {
-                res.innerText = "Không duyệt thiết bị thành công ❌";
+                status.innerText = "Không duyệt thiết bị thành công ❌";
             }
+        }
+
+        function startTimer() {
+            let time = 3600;
+            const timerDiv = document.getElementById('timer');
+            timerDiv.classList.remove('hidden');
+            const interval = setInterval(() => {
+                let h = Math.floor(time / 3600);
+                let m = Math.floor((time % 3600) / 60);
+                let s = time % 60;
+                timerDiv.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                if (time-- <= 0) { clearInterval(interval); location.reload(); }
+            }, 1000);
         }
     </script>
 </body>
