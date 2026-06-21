@@ -2,31 +2,59 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>System Access</title>
+    <title>System Access - Secure Gate</title>
     <style>
-        body { background: #000; color: #0f0; font-family: 'Courier New', Courier, monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        /* CSS Giao diện Matrix */
+        body { 
+            margin: 0; padding: 0; background: #000; color: #0f0; 
+            font-family: 'Courier New', Courier, monospace; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; overflow: hidden; 
+        }
         canvas { position: absolute; top: 0; left: 0; z-index: 0; }
-        #app { position: relative; z-index: 1; border: 2px solid #0f0; padding: 30px; background: rgba(0,0,0,0.8); box-shadow: 0 0 20px #0f0; text-align: center; }
-        input { background: transparent; border: 1px solid #0f0; color: #0f0; padding: 10px; width: 300px; text-align: center; margin: 10px 0; }
-        button { background: #0f0; color: #000; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
+        
+        #app { 
+            position: relative; z-index: 1; border: 2px solid #0f0; 
+            padding: 40px; background: rgba(0,0,0,0.85); 
+            box-shadow: 0 0 20px #0f0; text-align: center;
+            width: 350px;
+        }
+        
+        input { 
+            background: #000; border: 1px solid #0f0; color: #0f0; 
+            padding: 12px; width: 90%; text-align: center; 
+            margin: 15px 0; font-size: 16px;
+        }
+        
+        button { 
+            background: #0f0; color: #000; border: none; 
+            padding: 10px 25px; cursor: pointer; font-weight: bold; 
+            text-transform: uppercase; transition: 0.3s;
+        }
+        button:hover { background: #fff; box-shadow: 0 0 10px #0f0; }
+        
         .hidden { display: none; }
-        #timer { font-size: 2em; color: #fff; text-shadow: 0 0 10px #0f0; }
+        #status { margin-top: 20px; font-weight: bold; }
+        #timer { font-size: 2.5em; color: #fff; margin-top: 15px; text-shadow: 0 0 10px #0f0; }
     </style>
 </head>
 <body>
     <canvas id="matrix"></canvas>
 
-    <div id="login-screen">
-        <h2>LOGIN REQUIRED</h2>
-        <input type="password" id="pass" placeholder="Nhập mật khẩu...">
-        <br><button onclick="checkLogin()">XÁC NHẬN</button>
-    </div>
+    <div id="app">
+        <div id="login-screen">
+            <h3>HỆ THỐNG XÁC THỰC</h3>
+            <input type="password" id="pass" placeholder="Mật khẩu truy cập...">
+            <br><button onclick="checkLogin()">LOGIN</button>
+        </div>
 
-    <div id="main-screen" class="hidden">
-        <input type="text" id="device-key" placeholder="Nhập mã thiết bị..." maxlength="41">
-        <br><button onclick="checkDevice()">DUYỆT THIẾT BỊ</button>
-        <p id="status"></p>
-        <div id="timer" class="hidden">01:00:00</div>
+        <div id="main-screen" class="hidden">
+            <h3>QUẢN LÝ THIẾT BỊ</h3>
+            <input type="text" id="device-key" placeholder="Nhập 40 ký tự..." maxlength="40">
+            <br><button onclick="checkDevice()">DUYỆT THIẾT BỊ</button>
+            <p id="status"></p>
+            <div id="timer" class="hidden">01:00:00</div>
+        </div>
     </div>
 
     <script>
@@ -34,47 +62,56 @@
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         canvas.height = window.innerHeight; canvas.width = window.innerWidth;
-        const drops = Array(Math.floor(canvas.width/10)).fill(1);
+        const drops = Array(Math.floor(canvas.width/15)).fill(1);
         function draw() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#0f0';
             drops.forEach((y, i) => {
-                ctx.fillText(String.fromCharCode(0x30A0 + Math.random() * 96), i * 10, y * 10);
-                if (y * 10 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                ctx.fillText(String.fromCharCode(0x30A0 + Math.random() * 96), i * 15, y * 15);
+                if (y * 15 > canvas.height && Math.random() > 0.975) drops[i] = 0;
                 drops[i]++;
             });
         }
-        setInterval(draw, 33);
+        setInterval(draw, 50);
 
-        // Logic
+        // Logic Đăng nhập
         function checkLogin() {
             if(document.getElementById('pass').value === 'ptba-key12') {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-screen').classList.remove('hidden');
-            } else { alert("Sai mật khẩu!"); }
+            } else { alert("Mật khẩu không chính xác!"); }
         }
 
+        // Logic Duyệt thiết bị
         function checkDevice() {
             const input = document.getElementById('device-key').value;
             const status = document.getElementById('status');
+            const timerDiv = document.getElementById('timer');
+
             if (input.length === 40) {
                 status.innerText = "Duyệt thiết bị thành công 🚀📱";
+                status.style.color = "#0f0";
+                timerDiv.classList.remove('hidden');
                 startTimer();
             } else {
                 status.innerText = "Không duyệt thiết bị thành công ❌";
+                status.style.color = "#f00";
             }
         }
 
+        // Logic Đếm ngược
         function startTimer() {
             let time = 3600;
             const timerDiv = document.getElementById('timer');
-            timerDiv.classList.remove('hidden');
             const interval = setInterval(() => {
                 let h = Math.floor(time / 3600);
                 let m = Math.floor((time % 3600) / 60);
                 let s = time % 60;
                 timerDiv.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                if (time-- <= 0) { clearInterval(interval); location.reload(); }
+                if (time-- <= 0) { 
+                    clearInterval(interval); 
+                    location.reload(); 
+                }
             }, 1000);
         }
     </script>
